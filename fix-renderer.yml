@@ -1,0 +1,33 @@
+# One-off repair script: applies winetricks renderer=gdi to an *existing*
+# MTGO install. Use this if you installed with an older copy of
+# magic-the-gathering-online.yml (before it included this fix) and don't
+# want to risk a full reinstall — Lutris's winetricks task hard-aborts the
+# whole install chain if you re-run a verb that's already applied, so
+# re-running the main installer script over an existing prefix is not safe.
+#
+# Usage: in Lutris, "+" -> "Install script" -> point it at this file. When
+# asked for the install directory, browse to your EXISTING MTGO folder
+# (e.g. ~/Games/magic-the-gathering-online) instead of accepting a new one.
+# This runs a single winetricks verb against that folder and nothing else.
+#
+# Afterward, right-click the temporary "MTGO Renderer Fix" entry Lutris
+# creates -> Remove (do NOT delete files) -> keep using your real
+# "Magic The Gathering Online" entry as before.
+
+name: MTGO Renderer Fix
+game_slug: magic-the-gathering-online-renderer-fix
+version: repair script
+slug: magic-the-gathering-online-renderer-fix
+runner: wine
+
+script:
+  game:
+    exe: $GAMEDIR/setup.exe
+    prefix: $GAMEDIR
+    arch: win64
+
+  installer:
+  - task:
+      name: winetricks
+      prefix: $GAMEDIR
+      app: renderer=gdi

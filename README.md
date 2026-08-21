@@ -113,14 +113,39 @@ and no editing of files outside the game's own prefix.
   been stuck for more than ~15 minutes.
 - **Game won't launch / crashes immediately.** Double check step 6 — MTGO
   needs the GE-Proton/Wine-GE build, not Lutris's older bundled Wine.
-- **Still crashes when a sound would play.** Re-run the "sound=disabled"
-  winetricks step manually: right-click the game → **Configure** →
-  **Wine** section → **Run winetricks** (or from a terminal:
-  `flatpak run net.lutris.Lutris winetricks sound=disabled` with
-  `WINEPREFIX` set to the game's install folder).
+- **Splash/loading screens appear, then nothing — no main window, but the
+  process is still running.** This is MTGO's WPF UI failing to render
+  under Wine's default hardware-accelerated renderer. The installer
+  already applies the fix (`winetricks renderer=gdi`) for new installs. If
+  you installed with an older copy of this script, see "Applying a fix to
+  an existing install" below.
+- **Still crashes when a sound would play.** The installer already applies
+  `winetricks sound=disabled`. If it's still happening, see "Applying a fix
+  to an existing install" below to re-apply that verb.
 - **UI still freezes when scrolling your collection.** Confirm
   `mtgo-tune.sh` actually ran: check the Lutris install folder for the game
   (visible under **Configure** → **System options** → **Game directory**)
   and make sure `mtgo-tune.sh` is present and executable. If MTGO was just
   updated by its own auto-updater, launch the game once more — the
   pre-launch hook re-applies the flags before every session.
+
+### Applying a fix to an existing install
+
+**Do not just re-run `magic-the-gathering-online.yml`** against a folder
+you already installed to. Lutris's winetricks step treats a verb that's
+already applied as a hard error and aborts the *rest* of the install
+silently — including any later steps you actually needed — rather than
+skipping it and moving on.
+
+Instead, use `fix-renderer.yml` from this repo the same way you installed
+the main script (Lutris "+" → "Install script"), but when it asks for an
+install location, browse to your **existing** MTGO folder instead of
+accepting a new one. It applies exactly one winetricks verb
+(`renderer=gdi`) to that folder and nothing else. Afterward, remove the
+temporary "MTGO Renderer Fix" entry Lutris creates (right-click → Remove,
+without deleting files) and keep using your real game entry.
+
+The same pattern works for re-applying any single winetricks verb to an
+existing install — copy `fix-renderer.yml`, change the `app:` line under
+`installer:` to the verb you need (e.g. `sound=disabled`), and install it
+into your existing folder the same way.

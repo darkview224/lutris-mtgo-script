@@ -1,0 +1,33 @@
+# Recovery script: recreates the Lutris library entry for an MTGO install
+# that already exists on disk, without touching the prefix at all. No
+# winetricks steps here on purpose — this only points a fresh Lutris entry
+# at your existing folder.
+#
+# Usage: in Lutris, "+" -> "Install script" -> point it at this file. When
+# asked for the install directory, browse to your EXISTING MTGO folder
+# (e.g. ~/Games/magic-the-gathering-online) instead of accepting a new one.
+# When it finishes (should be instant), you'll have a working
+# "Magic The Gathering Online" entry again, same as before, with all your
+# existing prefix and fixes intact.
+
+name: Magic The Gathering Online
+game_slug: magic-the-gathering-online
+version: Fedora Atomic / Flatpak Lutris
+slug: magic-the-gathering-online-atomic
+runner: wine
+
+script:
+  game:
+    exe: $GAMEDIR/setup.exe
+    prefix: $GAMEDIR
+    arch: win64
+
+  system:
+    prelaunch_command: bash $GAMEDIR/mtgo-tune.sh
+    prelaunch_wait: true
+
+  installer:
+  - task:
+      name: create_prefix
+      prefix: $GAMEDIR
+      arch: win64

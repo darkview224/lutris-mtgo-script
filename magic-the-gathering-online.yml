@@ -71,6 +71,16 @@ script:
       prefix: $GAMEDIR
       app: sound=disabled
 
+  # Critical fix: MTGO's WPF UI can start (you'll see the splash and loading
+  # screens) and then never show its main window at all, even though the
+  # process is still running. This is WPF's hardware-accelerated (D3D)
+  # renderer failing to composite under Wine. Forcing GDI rendering avoids
+  # it. Sourced from the pauleve/docker-mtgo project's own Wine setup.
+  - task:
+      name: winetricks
+      prefix: $GAMEDIR
+      app: renderer=gdi
+
   - task:
       name: wineexec
       prefix: $GAMEDIR

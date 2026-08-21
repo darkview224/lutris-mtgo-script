@@ -77,6 +77,14 @@ script:
       executable: setup
       exclude_processes: dfsvc.exe
 
+  # wineexec above runs setup.exe wherever you selected it from (e.g.
+  # ~/Downloads) — it does NOT copy it into $GAMEDIR. Without this step,
+  # $GAMEDIR/setup.exe (what "game.exe" below points the Play button at)
+  # would never exist.
+  - copy:
+      src: setup
+      dst: $GAMEDIR
+
   # Re-applied on every launch via prelaunch_command above, because MTGO's
   # updater overwrites MTGO.exe.config and reverts these flags. Only touches
   # the game's own prefix folder — no host paths, no runner detection.

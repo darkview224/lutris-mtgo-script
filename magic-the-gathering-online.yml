@@ -27,6 +27,11 @@
 # Usage: in Lutris, "+" -> "Install script" -> point it at this file.
 # See README.md in this repository for the full step-by-step instructions,
 # including the one-time Wine/GE-Proton runner setup Aurora needs first.
+#
+# NOTE ON FORMAT: Lutris's "Install script" file picker expects the same
+# shape its own lutris.net API returns — top-level metadata plus the actual
+# installer body nested under a "script:" key. That's why everything below
+# is nested that way instead of flat.
 
 name: Magic The Gathering Online
 game_slug: magic-the-gathering-online
@@ -34,62 +39,63 @@ version: Fedora Atomic / Flatpak Lutris
 slug: magic-the-gathering-online-atomic
 runner: wine
 
-files:
-- setup: "N/A:Select the MTGO setup.exe you downloaded from https://www.mtgo.com/en/mtgo/download"
+script:
+  files:
+  - setup: "N/A:Select the MTGO setup.exe you downloaded from https://www.mtgo.com/en/mtgo/download"
 
-game:
-  exe: $GAMEDIR/setup.exe
-  prefix: $GAMEDIR
-  arch: win64
-
-system:
-  prelaunch_command: bash $GAMEDIR/mtgo-tune.sh
-  prelaunch_wait: true
-
-installer:
-- task:
-    name: create_prefix
+  game:
+    exe: $GAMEDIR/setup.exe
     prefix: $GAMEDIR
     arch: win64
 
-- task:
-    name: winetricks
-    prefix: $GAMEDIR
-    app: corefonts dotnet48
+  system:
+    prelaunch_command: bash $GAMEDIR/mtgo-tune.sh
+    prelaunch_wait: true
 
-# Critical fix: MTGO crashes under Wine the moment it plays a sound. Disabling
-# the audio driver avoids the crash entirely; the client is fully usable
-# without sound.
-- task:
-    name: winetricks
-    prefix: $GAMEDIR
-    app: sound=disabled
+  installer:
+  - task:
+      name: create_prefix
+      prefix: $GAMEDIR
+      arch: win64
 
-- task:
-    name: wineexec
-    prefix: $GAMEDIR
-    executable: setup
-    exclude_processes: dfsvc.exe
+  - task:
+      name: winetricks
+      prefix: $GAMEDIR
+      app: corefonts dotnet48
 
-# Re-applied on every launch via prelaunch_command above, because MTGO's
-# updater overwrites MTGO.exe.config and reverts these flags. Only touches
-# the game's own prefix folder — no host paths, no runner detection.
-- write_file:
-    file: $GAMEDIR/mtgo-tune.sh
-    content: |
-      #!/usr/bin/env bash
-      # Re-applies the WPF flags that stop MTGO's collection view from
-      # pinning a CPU core / freezing the UI. Safe to run any number of
-      # times; silently does nothing if the config file isn't there yet.
-      set -uo pipefail
-      GAMEDIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-      find "$GAMEDIR" -path '*Apps/2.0*' -iname 'MTGO.exe.config' -exec sed -i -E \
-        's/("(DisableAutomationPeer|PurgeAutomationEvents|DisableStylusInput|DisableTabletDevices)" value=")false/\1true/g' \
-        {} + 2>/dev/null
-      exit 0
+  # Critical fix: MTGO crashes under Wine the moment it plays a sound.
+  # Disabling the audio driver avoids the crash entirely; the client is
+  # fully usable without sound.
+  - task:
+      name: winetricks
+      prefix: $GAMEDIR
+      app: sound=disabled
 
-- execute:
-    command: chmod +x $GAMEDIR/mtgo-tune.sh
+  - task:
+      name: wineexec
+      prefix: $GAMEDIR
+      executable: setup
+      exclude_processes: dfsvc.exe
 
-- execute:
-    command: bash $GAMEDIR/mtgo-tune.sh
+  # Re-applied on every launch via prelaunch_command above, because MTGO's
+  # updater overwrites MTGO.exe.config and reverts these flags. Only touches
+  # the game's own prefix folder — no host paths, no runner detection.
+  - write_file:
+      file: $GAMEDIR/mtgo-tune.sh
+      content: |
+        #!/usr/bin/env bash
+        # Re-applies the WPF flags that stop MTGO's collection view from
+        # pinning a CPU core / freezing the UI. Safe to run any number of
+        # times; silently does nothing if the config file isn't there yet.
+        set -uo pipefail
+        GAMEDIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+        find "$GAMEDIR" -path '*Apps/2.0*' -iname 'MTGO.exe.config' -exec sed -i -E \
+          's/("(DisableAutomationPeer|PurgeAutomationEvents|DisableStylusInput|DisableTabletDevices)" value=")false/\1true/g' \
+          {} + 2>/dev/null
+        exit 0
+
+  - execute:
+      command: chmod +x $GAMEDIR/mtgo-tune.sh
+
+  - execute:
+      command: bash $GAMEDIR/mtgo-tune.sh

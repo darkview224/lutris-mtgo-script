@@ -1,0 +1,33 @@
+# One-off repair script: opens the real winecfg dialog against an existing
+# MTGO prefix. Use this when Lutris's own UI doesn't expose an option you
+# need (e.g. "Emulate a virtual desktop" under the Graphics tab) — this
+# bypasses Lutris's own runner-options UI entirely and just runs the real
+# Windows control panel applet, which always has every tab.
+#
+# Usage: in Lutris, "+" -> "Install script" -> point it at this file. When
+# asked for the install directory, browse to your EXISTING MTGO folder
+# (e.g. ~/Games/magic-the-gathering-online, or wherever yours lives).
+# winecfg will pop up — make your change there (e.g. Graphics tab ->
+# "Emulate a virtual desktop", pick a resolution like 1920x1080) and close
+# it normally; the setting is saved into the prefix immediately.
+#
+# Afterward, remove the temporary "Open winecfg" entry Lutris creates
+# (right-click -> Remove, without deleting files) and keep using your real
+# game entry.
+
+name: Open winecfg
+game_slug: magic-the-gathering-online-winecfg
+version: repair script
+slug: magic-the-gathering-online-winecfg
+runner: wine
+
+script:
+  game:
+    exe: $GAMEDIR/setup.exe
+    prefix: $GAMEDIR
+    arch: win64
+
+  installer:
+  - task:
+      name: winecfg
+      prefix: $GAMEDIR

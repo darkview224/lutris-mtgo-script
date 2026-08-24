@@ -40,8 +40,14 @@ slug: magic-the-gathering-online-atomic
 runner: wine
 
 script:
+  # Downloads setup.exe directly from MTGO's own patch server (operated by
+  # Daybreak Games) instead of making you fetch it by hand first. If this
+  # URL ever starts failing (patch-server paths do occasionally change),
+  # replace this line with:
+  #   - setup: "N/A:Select the MTGO setup.exe you downloaded from https://www.mtgo.com/en/mtgo/download"
+  # which prompts you to point at a manually-downloaded copy instead.
   files:
-  - setup: "N/A:Select the MTGO setup.exe you downloaded from https://www.mtgo.com/en/mtgo/download"
+  - setup: "https://mtgo.patch.daybreakgames.com/patch/mtg/live/client/setup.exe"
 
   game:
     exe: $GAMEDIR/setup.exe

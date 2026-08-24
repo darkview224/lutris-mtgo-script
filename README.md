@@ -18,21 +18,16 @@ command above:
 flatpak remote-add --user --if-not-exists flathub https://flathub.org/repo/flathub.flatpakrepo
 ```
 
-## 2. Download the MTGO installer
-
-Go to **https://www.mtgo.com/en/mtgo/download** in your browser and download
-`setup.exe`. Let it save to your normal Downloads folder — you'll pick the
-file from inside Lutris in step 5, so its exact location doesn't matter.
-
-## 3. Get this repo's installer script
+## 2. Get this repo's installer script
 
 ```
 git clone https://github.com/darkview224/lutris-mtgo-script.git
 ```
 
-You now have `lutris-mtgo-script/magic-the-gathering-online.yml`.
+You now have `lutris-mtgo-script/magic-the-gathering-online.yml`. It
+downloads MTGO's `setup.exe` for you — no separate manual download needed.
 
-## 4. Install a GE-Proton/Wine-GE runner build
+## 3. Install a GE-Proton/Wine-GE runner build
 
 MTGO needs a newer Wine build than Lutris ships by default. Do this once,
 before installing the game:
@@ -48,33 +43,40 @@ before installing the game:
    written to your host system.
 6. Close the version manager and Preferences.
 
-## 5. Run the installer
+## 4. Run the installer
 
 1. In Lutris, click the **+** button (top left) → **Install script**.
-2. Browse to `lutris-mtgo-script/magic-the-gathering-online.yml` from step 3
+2. Browse to `lutris-mtgo-script/magic-the-gathering-online.yml` from step 2
    and select it.
-3. When prompted for the setup file, browse to the `setup.exe` you
-   downloaded in step 2.
+3. **Make sure the install directory it offers doesn't already exist** (or
+   is completely empty). Re-running this installer into a folder that
+   already has an MTGO install in it will fail partway through — Lutris
+   aborts the whole install if any winetricks step finds something already
+   applied, instead of just skipping it. If you're redoing an install,
+   delete the old folder first.
 4. Click through the installer. It will:
+   - download `setup.exe` from MTGO's patch server,
    - create a Wine prefix,
    - install fonts and .NET Framework 4.8 (this step takes a few minutes —
      let it finish, don't cancel it),
    - disable the Wine sound driver (see "Why sound is disabled" below),
+   - force GDI rendering so MTGO's main window actually appears (see
+     "Why GDI rendering is forced" below),
    - run `setup.exe` to install the MTGO client itself.
 5. When it finishes, MTGO is listed in your Lutris library as
    **Magic The Gathering Online**.
 
-## 6. Set the game to use the GE-Proton/Wine-GE build
+## 5. Set the game to use the GE-Proton/Wine-GE build
 
 The installer doesn't pin a Wine version, so point it at the one you
-installed in step 4:
+installed in step 3:
 
 1. Right-click **Magic The Gathering Online** in your library → **Configure**.
 2. Go to the **Runner options** tab.
 3. Set **Wine version** to the GE-Proton/Wine-GE build you installed.
 4. Click **Save**.
 
-## 7. Play
+## 6. Play
 
 Click **Play** on the game in Lutris. The first launch runs the MTGO
 bootstrapper, which finishes downloading and activating the client, then
@@ -92,6 +94,16 @@ Wine/.NET WPF audio issue, not something specific to this script or to
 Aurora. Disabling Wine's audio driver sidesteps the crash entirely. MTGO is
 fully playable without sound; you aren't losing anything you'd otherwise
 have working.
+
+## Why GDI rendering is forced
+
+MTGO's UI is built on WPF, which normally renders through Direct3D. Under
+Wine, that can fail silently: MTGO's splash and loading screens appear, the
+process stays running, but the main window never actually shows up. Forcing
+WPF onto Wine's GDI renderer (`winetricks renderer=gdi`) avoids this. This
+is the same fix used by the actively-maintained
+[pauleve/docker-mtgo](https://github.com/pauleve/docker-mtgo) project's own
+Wine setup.
 
 ## Why there's a "tuning" step on every launch
 
@@ -111,7 +123,7 @@ and no editing of files outside the game's own prefix.
 - **Installer hangs on the .NET Framework 4.8 step.** This is normal — it
   can take several minutes with no visible progress. Only cancel it if it's
   been stuck for more than ~15 minutes.
-- **Game won't launch / crashes immediately.** Double check step 6 — MTGO
+- **Game won't launch / crashes immediately.** Double check step 5 — MTGO
   needs the GE-Proton/Wine-GE build, not Lutris's older bundled Wine.
 - **Splash/loading screens appear, then nothing — no main window, but the
   process is still running.** This is MTGO's WPF UI failing to render
@@ -135,17 +147,24 @@ and no editing of files outside the game's own prefix.
 you already installed to. Lutris's winetricks step treats a verb that's
 already applied as a hard error and aborts the *rest* of the install
 silently — including any later steps you actually needed — rather than
-skipping it and moving on.
+skipping it and moving on. This applies even on a second machine if you're
+installing into a shared/external drive that already has a previous
+attempt's files on it — check the target folder is actually empty first.
 
-Instead, use `fix-renderer.yml` from this repo the same way you installed
-the main script (Lutris "+" → "Install script"), but when it asks for an
-install location, browse to your **existing** MTGO folder instead of
-accepting a new one. It applies exactly one winetricks verb
-(`renderer=gdi`) to that folder and nothing else. Afterward, remove the
-temporary "MTGO Renderer Fix" entry Lutris creates (right-click → Remove,
-without deleting files) and keep using your real game entry.
+If you just need to re-apply one winetricks fix (e.g. you're on an older
+install that predates `renderer=gdi` being added), use `fix-renderer.yml`
+from this repo the same way you installed the main script (Lutris "+" →
+"Install script"), but when it asks for an install location, browse to
+your **existing** MTGO folder instead of accepting a new one. It applies
+exactly one winetricks verb (`renderer=gdi`) to that folder and nothing
+else. Afterward, remove the temporary "MTGO Renderer Fix" entry Lutris
+creates (right-click → Remove, without deleting files) and keep using your
+real game entry. The same pattern works for any other single verb — copy
+`fix-renderer.yml`, change the `app:` line under `installer:` to the verb
+you need (e.g. `sound=disabled`), and install it into your existing folder
+the same way.
 
-The same pattern works for re-applying any single winetricks verb to an
-existing install — copy `fix-renderer.yml`, change the `app:` line under
-`installer:` to the verb you need (e.g. `sound=disabled`), and install it
-into your existing folder the same way.
+If your game's Lutris library entry itself gets removed (its files are
+still on disk, you just lost the entry), use `reconnect.yml` the same
+way — point it at the existing folder — to recreate the entry with no
+winetricks steps at all.

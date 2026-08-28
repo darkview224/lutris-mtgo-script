@@ -35,8 +35,7 @@ while true; do
   if [ "$FIRST" = "1" ]; then
     log "Launching initial Claude Code session"
     claude --dangerously-skip-permissions -p \
-      "Read HANDOFF.md in this repo and carry out the work it describes, autonomously, to completion or to a documented dead end. Do not stop to ask me anything." \
-      --continue
+      "Read HANDOFF.md in this repo and carry out the work it describes, autonomously, to completion or to a documented dead end. Do not stop to ask me anything."
     FIRST=0
   else
     log "Relaunching (continuing previous session)"

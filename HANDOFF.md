@@ -28,12 +28,37 @@ working, as part of finishing this out, not before.
 
 ## Goal / definition of done
 
-Install MTGO via `magic-the-gathering-online.yml`, click Play in Lutris, and have
-MTGO reach a stable, usable login screen — one that stays open (doesn't crash
-within, say, 2 minutes of idling on it). You do not need to actually log in
-(no credentials are available to you, and none are needed to fix this — every
-failure so far happens before/during login-window startup, not because of
-anything account-specific).
+The **only** thing that counts as success is: a completely clean machine state,
+`magic-the-gathering-online.yml` — and nothing else — installs MTGO, and clicking
+Play gets MTGO to a stable, usable login screen that stays open (doesn't crash
+within, say, 2 minutes of idling on it). You do not need to actually log in (no
+credentials are available to you, and none are needed — every failure so far
+happens before/during login-window startup, not because of anything
+account-specific).
+
+**Any fix you find while experimenting must be folded back into
+`magic-the-gathering-online.yml` itself** — as a new winetricks verb, a registry
+tweak added to `mtgo-tune.sh`, a different runner default, whatever it takes —
+not left as a separate repair script (`fix-renderer.yml` and friends) that has to
+be run afterward. Those repair scripts exist only to patch an *existing*,
+already-broken install without a full reinstall (because of the winetricks
+already-applied-verb footgun) — they are debugging conveniences, not part of the
+shipped solution. If a fix only exists in one of those files when you think
+you're done, you are not done: port it into the main installer.
+
+**Before declaring success, run the actual acceptance test:**
+1. Fully remove MTGO — delete the Lutris library entry (with files) and confirm
+   the install directory is actually gone (`ls` it, don't just trust the Lutris
+   UI).
+2. Install *only* by running `magic-the-gathering-online.yml` fresh — no repair
+   scripts, no manual `wine reg add` commands, no manually toggling checkboxes in
+   winecfg. If reaching the login screen requires any manual step beyond what the
+   installer script and a normal Play click do, the work isn't finished — that
+   step needs to be automated into the script (e.g. via a `write_file` +
+   `wineexec`/`execute` task, the same pattern `mtgo-tune.sh` already uses).
+3. Click Play. Confirm the login screen appears and survives ~2 minutes idle.
+4. Only once that single-script, from-scratch run succeeds, update this file's
+   Status section to say so, commit, and push.
 
 ## Repo layout
 
@@ -147,7 +172,14 @@ UI Automation implementation is known to be incomplete.
    scrollback), and check whether the exception signature changed at all before
    concluding a fix worked or didn't.
 
-5. If you exhaust all of the above without success: write up everything tried
+5. As soon as any experiment actually gets to a stable login screen, **stop
+   experimenting in the live prefix and go make the same change in
+   `magic-the-gathering-online.yml` itself**, then run the full acceptance test
+   from "Goal / definition of done" above before considering it fixed. A fix
+   that only exists as a manual step you did by hand, or as a one-off repair
+   script, is not done yet.
+
+6. If you exhaust all of the above without success: write up everything tried
    and every finding into this Status section, commit and push, and stop. Don't
    spin on unproductive repetition — a clear, well-documented dead end is a
    useful outcome too.

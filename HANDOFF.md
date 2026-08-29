@@ -115,6 +115,24 @@ If `PROTON_NO_NTSYNC=1` reaches a stable login screen, fold it into
 `magic-the-gathering-online.yml`'s `system: env:` block (the reference does
 exactly this) and run the full acceptance test via the Lutris GUI.
 
+**Progress (20:10):** clean `~/mtgo-test/prefix` built OK (corefonts, dotnet40,
+dotnet48, sound=disabled, renderer=gdi). Ran `setup.exe` via umu-run directly
+(`~/mtgo-test/run.sh`). Notes:
+- Direct debug needs `setup.exe` copied into the prefix dir (Lutris's installer
+  already does this via its `copy` step; `run.sh` handles it).
+- ClickOnce shows an **"Application Install - Security Warning"** dialog that
+  renders as a blank white window (WPF/GDI paint issue) but is functional:
+  `xdotool key --window <id> alt+i` accepts it ("Install" mnemonic). This is the
+  same click the README already tells users to do ("click through the
+  installer") — no installer change needed, just be aware the dialog may not
+  paint.
+- After Alt+I: "(0%) Installing Magic The Gathering Online" — ~640 MB client
+  download now in progress.
+- GUI automation on this box: physical output not compositing to a visible
+  desktop (full-screen `spectacle` returns blank), BUT `spectacle -b -n -a`
+  (active window) after `xdotool windowactivate <id>` DOES capture individual
+  windows. `xdotool key/windowactivate` work. `import -window` does NOT.
+
 ### [initial state — read this first]
 
 Install completes successfully every time: corefonts, dotnet48,

@@ -82,6 +82,54 @@ scripts above.
 
 *(Update this section as you make progress. Most recent entry at the top.)*
 
+### [2026-08-28 ~22:35 — SECOND crash found in the real Lutris acceptance test]
+
+The `PROTON_NO_NTSYNC=1` fix (in the yml) is correct for the ntsync crash. But
+the first real Lutris install run surfaced a **different, second crash** that the
+manual `~/mtgo-test` prefix never hit:
+
+```
+System.InvalidCastException: Unable to cast COM object ... to 'ISimpleAudioVolume'
+  ... E_NOINTERFACE
+  at Shiny.Utilities.AudioManager.IsMuted()
+  at Shiny.Utilities.AudioManager.GetWindowsVolume()
+  at Shiny.Utilities.AudioManager.PlaySound(...)  ->  PlayAlert(AlertSound)
+  at Shiny.ShellViewModel.Initialize(...)          [unhandled -> app exits]
+```
+
+Root cause: **`winetricks sound=disabled` did not persist in the Lutris-built
+prefix.** The Lutris prefix had NO `[Software\Wine\Drivers] "Audio"` value and
+`winepulse.drv` was active (its `devices\...` subkeys were written at MTGO launch
+time, *after* winetricks ran). The manual prefix (built with GE-Proton **11-4**)
+kept `"Audio"="disabled"` and only ever hit a *handled* `NAudio.MmException:
+BadDeviceId` — it reached `ConnectionSucceeded` + `Navigate to Scene:
+ILoginViewModel` fine. Lutris auto-fetched GE-Proton **11-6** (latest), and 11-6's
+prefix init appears to re-enable winepulse, clobbering the winetricks setting —
+leaving audio half-working, which is what triggers the unhandled
+`ISimpleAudioVolume` path.
+
+Two audio states, two behaviors:
+- audio FULLY off (`"Audio"=""`)  -> `waveOutOpen` BadDeviceId, **handled**, login OK
+- audio half-on (winepulse loaded) -> `ISimpleAudioVolume` E_NOINTERFACE, **fatal**
+
+**Fix being tested:** disable the audio driver DLLs via an env var (survives
+prefix upgrades, unlike the winetricks registry write):
+`WINEDLLOVERRIDES="winepulse.drv,winealsa.drv,wineoss.drv,winecoreaudio.drv,mmdevapi="`
+added to `system: env:` next to `PROTON_NO_NTSYNC`. Proton `append`s its own
+overrides after the user's, so this stays effective.
+
+Rebuilding `~/mtgo-test/prefix` fresh with GE-Proton 11-6 (`~/mtgo-test/build.sh`)
+to reproduce the 11-6 audio crash and confirm the WINEDLLOVERRIDES fix before
+folding it in + re-running the Lutris acceptance test.
+
+Also seen: when MTGO crashes on launch, `setup.exe`/`dfsvc.exe`/`xalia.exe`
+linger and proton's `waitforexitandrun` never returns -> the Lutris install
+hangs on the `wineexec setup` step (had to Abort). If the crash is fixed this
+shouldn't matter, but the installer's `exclude_processes: dfsvc.exe` may need
+`setup.exe`/`xalia.exe` added too.
+
+GE-Proton versions on this box: 11-4 (my early tests) and 11-6 (Lutris default).
+
 ### [2026-08-28 ~20:35 — ROOT CAUSE FIXED, acceptance test pending]
 
 **The crash is GE-Proton 11's in-kernel `ntsync`.** Fix: `PROTON_NO_NTSYNC=1`

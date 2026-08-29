@@ -54,7 +54,27 @@ script:
     prefix: $GAMEDIR
     arch: win64
 
+  # Pin the runner to the latest GE-Proton. MTGO needs a modern Wine build;
+  # Lutris's bundled Wine is too old and the client crashes on launch with it.
+  # "ge-proton" is a Lutris alias for "newest installed GE-Proton" (it will
+  # fetch one if none is present), so this removes the old manual
+  # "Configure -> Runner options -> Wine version" step.
+  wine:
+    version: ge-proton
+
   system:
+    env:
+      # Critical fix: disable GE-Proton 11's new in-kernel ntsync. With ntsync
+      # active, MTGO's WPF startup crashes during window teardown — several
+      # windows (EULA, main) appear, then MTGO.exe dies while the rest of the
+      # Wine process tree keeps running (Lutris still shows "Stop"). The failure
+      # is an unhandled Win32Exception from HwndWrapper.DestroyWindow inside
+      # Dispatcher.ShutdownImpl() — a thread-wakeup / synchronization failure
+      # that only happens under ntsync. Forcing the fsync fallback
+      # (PROTON_NO_NTSYNC=1) makes MTGO reach a stable, connected login screen.
+      # Confirmed against GE-Proton11-4 on Bazzite; same fix used by the
+      # phever/mtgo-linux project.
+      PROTON_NO_NTSYNC: '1'
     prelaunch_command: bash $GAMEDIR/mtgo-tune.sh
     prelaunch_wait: true
 

@@ -109,6 +109,10 @@ The launch log confirms both fixes are live on Play: `fsync: up and running`
 (PROTON_NO_NTSYNC) and `winepulse.drv` etc. `=` (disabled) in the effective
 WINEDLLOVERRIDES.
 
+Second Play (steady state) also verified: no ClickOnce/security dialog, MTGO
+window up and `Navigate to Scene: ILoginViewModel` ~3 seconds after clicking
+Play, stable, no crashes.
+
 **The three shipped changes (all in `magic-the-gathering-online.yml`, committed):**
 - `system: env: PROTON_NO_NTSYNC: '1'` — ntsync WPF-teardown crash.
 - `wine: overrides:` disabling winepulse/winealsa/wineoss/winecoreaudio — the

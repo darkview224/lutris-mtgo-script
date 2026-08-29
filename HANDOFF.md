@@ -82,6 +82,39 @@ scripts above.
 
 *(Update this section as you make progress. Most recent entry at the top.)*
 
+### [2026-08-28 ~20:00 — autonomous session on Bazzite native Lutris]
+
+Environment confirmed: Bazzite 44 Kinoite, native Lutris/umu-run/winetricks,
+GE-Proton11-4 installed (not 11-5). GUI available via KWin Wayland
+(`WAYLAND_DISPLAY=wayland-0`, Xwayland `DISPLAY=:0`,
+`XAUTHORITY=/run/user/1000/xauth_ZArEBO`); screenshots via ImageMagick `import`
+or `spectacle`, `xdotool` present.
+
+**Found an actively-maintained reference project that reaches the MTGO login
+screen:** [phever/mtgo-linux](https://github.com/phever/mtgo-linux) (cloned to
+`/tmp/mtgo-linux`). Verified working 2026-06-24 on Arch, GE-Proton11-1 + Lutris
+0.5.22. Its recipe vs. ours:
+- corefonts + dotnet48, sound=disabled — same as us.
+- **Does NOT use `renderer=gdi`.** (We added it; may have been compensating for
+  an ntsync-induced render failure rather than a real need.)
+- **`PROTON_NO_NTSYNC=1`** as a game env var. Their notes: GE-Proton11's new
+  in-kernel ntsync convoys MTGO's threads on locks with delayed wakeups. This is
+  exactly the failure mode of our crash — an unhandled `Win32Exception` in
+  `HwndWrapper.DestroyWindow` during `Dispatcher.ShutdownImpl()` is a
+  thread-synchronization / wakeup failure. Our build logs are full of
+  "ntsync: up and running." **Primary hypothesis: `PROTON_NO_NTSYNC=1` fixes the
+  crash.**
+- Same 4 WPF flags (DisableAutomationPeer etc.) via a per-launch tune script —
+  same as our `mtgo-tune.sh`.
+
+**Plan:** rebuilding a clean direct-debug prefix at `~/mtgo-test/` (corefonts
+dotnet48 sound=disabled renderer=gdi via `umu-run winetricks`), then test
+`setup.exe` launch with `PROTON_NO_NTSYNC=1`. Helper scripts:
+`~/mtgo-test/build.sh`, `~/mtgo-test/run-setup.sh <tag> [ENV=val ...]`.
+If `PROTON_NO_NTSYNC=1` reaches a stable login screen, fold it into
+`magic-the-gathering-online.yml`'s `system: env:` block (the reference does
+exactly this) and run the full acceptance test via the Lutris GUI.
+
 ### [initial state — read this first]
 
 Install completes successfully every time: corefonts, dotnet48,

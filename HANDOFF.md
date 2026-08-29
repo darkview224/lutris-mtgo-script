@@ -121,9 +121,26 @@ Notes for the acceptance test:
 - No git push credentials in this environment (no gh / SSH key / token) —
   commits are local only and need pushing later.
 
-**Remaining:** run the from-scratch Lutris acceptance test (wipe, install only
-`magic-the-gathering-online.yml`, Play, confirm login screen 2 min), then fix
-the README's `flatpak run` troubleshooting commands for the native-Lutris path.
+**Acceptance test IN PROGRESS (20:47):** driving the real Lutris 0.5.22 installer
+(`lutris -i magic-the-gathering-online.yml`) on this box. GUI automation notes:
+- This KDE session blocks synthetic input to native-Wayland windows (ydotool's
+  uinput device isn't on the seat) and KWin blocks X pointer-warp. **AT-SPI
+  works**: `~/mtgo-test/atspi.py <app> click "<label>"` invokes a button's
+  accessibility action. Run Lutris with `GDK_BACKEND=x11` so its Wine child
+  windows are Xwayland (xdotool `key --window` / `click --window` work on those,
+  e.g. `alt+i` on the ClickOnce dialog).
+- spectacle screenshots of the Lutris window are stale/blank (lid closed) — rely
+  on the AT-SPI tree dump for Lutris state.
+- Wizard steps: click "Install" (script row) -> "Continue" (install dir,
+  default `~/Games/magic-the-gathering-online` is fine) -> "Install" (file
+  source = Download) -> long install.
+
+First attempt hit "Failed to retrieve wine (ge-proton-x86_64) information" from
+the `wine: version: ge-proton` block — removed it (commit); Lutris 0.5.22
+defaults to latest GE-Proton via umu on its own. Second attempt is running now.
+
+**Still to do after the test passes:** update README (drop the now-unneeded
+"set the Wine version" step 5; note native Lutris works, not just Flatpak).
 
 ### [2026-08-28 ~20:00 — autonomous session on Bazzite native Lutris]
 

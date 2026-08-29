@@ -1,18 +1,18 @@
-# Recovery script: recreates the Lutris library entry for an MTGO install
-# that already exists on disk, without touching the prefix at all. No
-# winetricks steps here on purpose — this only points a fresh Lutris entry
-# at your existing folder.
+# Recovery script: recreates the Lutris library entry for an MTGO install that
+# already exists on disk, without touching the prefix at all. No winetricks
+# steps here on purpose — this only points a fresh Lutris entry at your existing
+# folder and re-applies the runtime fixes (ntsync + audio) the main installer
+# sets, so the recreated entry launches the same as before.
 #
-# Usage: in Lutris, "+" -> "Install script" -> point it at this file. When
-# asked for the install directory, browse to your EXISTING MTGO folder
-# (e.g. ~/Games/magic-the-gathering-online) instead of accepting a new one.
-# When it finishes (should be instant), you'll have a working
-# "Magic The Gathering Online" entry again, same as before, with all your
-# existing prefix and fixes intact.
+# Usage: in Lutris, "+" -> "Install script" -> point it at this file. When asked
+# for the install directory, browse to your EXISTING MTGO folder (e.g.
+# ~/Games/magic-the-gathering-online) instead of accepting a new one. When it
+# finishes (should be instant), you'll have a working "Magic The Gathering
+# Online" entry again, with your existing prefix and fixes intact.
 
 name: Magic The Gathering Online
 game_slug: magic-the-gathering-online
-version: Fedora Atomic / Flatpak Lutris
+version: Fedora Atomic
 slug: magic-the-gathering-online-atomic
 runner: wine
 
@@ -22,7 +22,18 @@ script:
     prefix: $GAMEDIR
     arch: win64
 
+  # Same runtime fixes as magic-the-gathering-online.yml — see that file for the
+  # full explanations. Without these the recreated entry crashes on launch.
+  wine:
+    overrides:
+      winepulse.drv: disabled
+      winealsa.drv: disabled
+      wineoss.drv: disabled
+      winecoreaudio.drv: disabled
+
   system:
+    env:
+      PROTON_NO_NTSYNC: '1'
     prelaunch_command: bash $GAMEDIR/mtgo-tune.sh
     prelaunch_wait: true
 

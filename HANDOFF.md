@@ -82,6 +82,47 @@ scripts above.
 
 *(Update this section as you make progress. Most recent entry at the top.)*
 
+### [2026-08-29 ~00:45 — Play verified working; final clean acceptance test running]
+
+**Both crashes are fixed and MTGO reaches a stable connected login screen on
+Play.** Verified on the real Lutris 0.5.22 game (GE-Proton 11-6, umu): mtgo.log
+shows `Socket "ConnectionSucceeded"` + `Navigate to Scene: ILoginViewModel`,
+`MTGO.exe` stays alive 2+ min, zero exceptions.
+
+Final fix shape in `magic-the-gathering-online.yml`:
+- `system: env: PROTON_NO_NTSYNC: '1'`  → ntsync crash. (This one *does* survive
+  to Play — confirmed by "fsync: up and running" in the launch log.)
+- `wine: overrides: {winepulse.drv: disabled, winealsa.drv: disabled,
+  wineoss.drv: disabled, winecoreaudio.drv: disabled}`  → audio crash. Had to be
+  a **runner-level DLL override**, NOT `system: env: WINEDLLOVERRIDES`: Lutris
+  rebuilds WINEDLLOVERRIDES from `wine.overrides` at launch and overwrites the
+  env value. With `wine.overrides` the disable shows up in the effective
+  WINEDLLOVERRIDES and MTGO gets the *handled* NAudio path.
+- **Removed the `wineexec setup` installer task.** It hung the install: after the
+  ClickOnce download, MTGO sits on the login screen and the umu/proton tree
+  (`umu-run`, `srt-bwrap`, `pv-adverb`, proton `python3`) never exits, and
+  `lutris-wrapper`/`ProcessWatcher` only ignores `SYSTEM_PROCESSES` +
+  `exclude_processes` — no reasonable exclude list covers those. The client now
+  deploys on the first Play instead (standard ClickOnce behaviour, already how
+  the README describes first launch).
+
+README rewritten for this flow (native + Flatpak Lutris; no manual runner/Wine-
+version steps; first-Play ClickOnce + blank security dialog / Alt+I).
+
+**Now running:** the full from-scratch acceptance test — wiped the Lutris entry
++ `~/Games/magic-the-gathering-online` + installer cache, fresh
+`lutris -i magic-the-gathering-online.yml`, then first Play. This is the one path
+not yet end-to-end verified: first Play doing the whole ClickOnce deploy from a
+prefix that never ran setup.exe during install.
+
+**If you're resuming:** check `pga.db` / `~/Games/magic-the-gathering-online`. If
+the install finished, click Play (`lutris lutris:rungame/magic-the-gathering-online`
+with `DISPLAY=:0 XAUTHORITY=/run/user/1000/xauth_ZArEBO GDK_BACKEND=x11`), accept
+the ClickOnce dialog (`xdotool key --window <id> alt+i`), and confirm
+`.../Logs/mtgo.log` reaches `Navigate to Scene: ILoginViewModel` and stays up
+2 min. Then set the Status here to DONE, commit, and (when creds exist) push
+`claude/mtgo-lutris-aurora-oiwfn8` + fast-forward `main`.
+
 ### [2026-08-29 ~00:25 — both crashes fixed in the yml; acceptance test v2 running]
 
 Confirmed in `~/mtgo-test/prefix` (GE-Proton **11-6**, umu-run):

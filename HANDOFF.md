@@ -82,6 +82,49 @@ scripts above.
 
 *(Update this section as you make progress. Most recent entry at the top.)*
 
+### [2026-08-28 ~20:35 — ROOT CAUSE FIXED, acceptance test pending]
+
+**The crash is GE-Proton 11's in-kernel `ntsync`.** Fix: `PROTON_NO_NTSYNC=1`
+(forces the fsync fallback). Now in `magic-the-gathering-online.yml` under
+`script: system: env:`. Also added `wine: version: ge-proton` to auto-pin the
+runner (removes old README step 5).
+
+Verified in the direct-debug prefix `~/mtgo-test/prefix` (GE-Proton11-4, umu-run,
+same winetricks set as the installer: corefonts dotnet48 sound=disabled
+renderer=gdi):
+- **Baseline, no env override:** reproduces the HANDOFF crash exactly — MTGO
+  deploys via ClickOnce, EULA + main window appear, then `MTGO.exe` dies while
+  `setup.exe`/`dfsvc.exe`/`xalia.exe` keep running. Build log shows
+  "ntsync: up and running."
+- **`PROTON_NO_NTSYNC=1` alone:** build log shows "fsync: up and running";
+  MTGO's own log (`…/Logs/mtgo.log`) shows
+  `Socket: "PendingSslConnection" - "ConnectionSucceeded"` then
+  `(UI|Navigate to Scene: ILoginViewModel)`; `MTGO.exe` stays alive and the
+  login screen stays up **2.5 min with zero crash/exception lines**. The client
+  reaches the MTGO servers (not just a local window).
+- Also confirmed the fully-rendered login screen visually under a
+  `PROTON_ENABLE_WAYLAND=1` run (screenshot). `PROTON_ENABLE_WAYLAND` is **not**
+  in the installer — `PROTON_NO_NTSYNC=1` alone is sufficient and matches the
+  phever/mtgo-linux reference which is proven on X11.
+
+Notes for the acceptance test:
+- ClickOnce shows an "Application Install - Security Warning" dialog that may
+  render blank; `Alt+I` ("Install" mnemonic) accepts it. This is the same
+  "click through the installer" step the README already documents.
+- This box's KDE session has the **laptop lid closed** — the compositor output
+  reads back blank via screencopy, so full-screen screenshots are black/white
+  and per-Xwayland-window capture is flaky. Workaround that mostly works:
+  activate the window via a KWin script (`workspace.activeWindow = w`) then
+  `spectacle -b -n -a`. `ydotool` (uinput) works for input on Wayland;
+  `xdotool` works for Xwayland windows. Functional verification via
+  `mtgo.log` + process liveness is the reliable signal here.
+- No git push credentials in this environment (no gh / SSH key / token) —
+  commits are local only and need pushing later.
+
+**Remaining:** run the from-scratch Lutris acceptance test (wipe, install only
+`magic-the-gathering-online.yml`, Play, confirm login screen 2 min), then fix
+the README's `flatpak run` troubleshooting commands for the native-Lutris path.
+
 ### [2026-08-28 ~20:00 — autonomous session on Bazzite native Lutris]
 
 Environment confirmed: Bazzite 44 Kinoite, native Lutris/umu-run/winetricks,

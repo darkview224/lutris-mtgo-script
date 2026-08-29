@@ -82,6 +82,34 @@ scripts above.
 
 *(Update this section as you make progress. Most recent entry at the top.)*
 
+### [2026-08-29 ~00:25 — both crashes fixed in the yml; acceptance test v2 running]
+
+Confirmed in `~/mtgo-test/prefix` (GE-Proton **11-6**, umu-run):
+
+1. **ntsync crash** → `PROTON_NO_NTSYNC=1` (already in yml). Verified: fresh 11-6
+   prefix, MTGO reaches `ConnectionSucceeded` + `Navigate to Scene:
+   ILoginViewModel`, stable 2+ min.
+2. **audio crash** (`ISimpleAudioVolume` E_NOINTERFACE, unhandled) → reproduced
+   by deleting `"Audio"="disabled"` from user.reg (which is exactly what Lutris's
+   winetricks `sound=disabled` task fails to persist under 11-6), fixed by adding
+   `WINEDLLOVERRIDES=winepulse.drv=;winealsa.drv=;wineoss.drv=;winecoreaudio.drv=`
+   to `system: env:`. Verified: with the reg key gone but the env override set,
+   MTGO hits the *handled* `NAudio BadDeviceId` and reaches the login screen,
+   stable 2+ min.
+3. **install hang**: after the ClickOnce download, `setup.exe` hands off to
+   `MTGO.exe` + `dfsvc.exe`/`xalia.exe`/`umu.exe`, none of which exit, so
+   Lutris's `wineexec` step (via `lutris-wrapper` / `ProcessWatcher`) waited
+   forever — only `SYSTEM_PROCESSES` + `exclude_processes` are ignored. Fixed:
+   `exclude_processes: dfsvc.exe MTGO.exe xalia.exe umu.exe`.
+
+All three are committed. `system: env:` IS applied to the installer's
+`wineexec setup` step (`interpreter.script_env`), so MTGO won't crash mid-install
+either.
+
+Acceptance test v2 in progress: `lutris -i magic-the-gathering-online.yml`
+(GDK_BACKEND=x11), driven via `~/mtgo-test/atspi.py net.lutris.Lutris click
+"<label>"`. Wizard: Install → Continue → Install → [ClickOnce Alt+I] → wait.
+
 ### [2026-08-28 ~22:35 — SECOND crash found in the real Lutris acceptance test]
 
 The `PROTON_NO_NTSYNC=1` fix (in the yml) is correct for the ntsync crash. But

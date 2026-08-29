@@ -82,6 +82,51 @@ scripts above.
 
 *(Update this section as you make progress. Most recent entry at the top.)*
 
+### [2026-08-29 ~00:55 — DONE. Full from-scratch acceptance test PASSED.]
+
+Clean-machine acceptance test, exactly as specified in "Goal / definition of
+done":
+
+1. Removed the Lutris library entry, `~/Games/magic-the-gathering-online`, and
+   `~/.cache/lutris/installer/magic-the-gathering-online`; confirmed the game dir
+   was gone.
+2. Installed **only** by running `magic-the-gathering-online.yml` fresh
+   (`lutris -i`). No repair scripts, no manual `wine reg`, no winecfg, no manual
+   runner/Wine-version selection. **The install completed on its own** (create
+   prefix → corefonts/dotnet48 → sound=disabled → renderer=gdi → copy setup.exe
+   → write mtgo-tune.sh → "Installation completed!"). No hang.
+3. Clicked **Play**. The one interactive step is the ClickOnce "Application
+   Install - Security Warning" dialog → Install / Alt+I (the "click through the
+   installer" step the README documents). The ~640 MB client then downloaded,
+   deployed, and MTGO launched.
+4. `.../Logs/mtgo.log`: `Socket "PendingSslConnection" - "ConnectionSucceeded"`
+   then `(UI|Navigate to Scene: ILoginViewModel)`. `MTGO.exe` stayed alive with
+   **zero crash/exception lines for 2+ minutes** on the login screen (connected
+   to MTGO's servers, not just a local window). Matches the login screen
+   confirmed visually earlier this session.
+
+The launch log confirms both fixes are live on Play: `fsync: up and running`
+(PROTON_NO_NTSYNC) and `winepulse.drv` etc. `=` (disabled) in the effective
+WINEDLLOVERRIDES.
+
+**The three shipped changes (all in `magic-the-gathering-online.yml`, committed):**
+- `system: env: PROTON_NO_NTSYNC: '1'` — ntsync WPF-teardown crash.
+- `wine: overrides:` disabling winepulse/winealsa/wineoss/winecoreaudio — the
+  `ISimpleAudioVolume` E_NOINTERFACE crash. Must be a runner-level DLL override,
+  not `system: env: WINEDLLOVERRIDES` (Lutris rebuilds that var at launch).
+- Removed the `wineexec setup` installer task — it deployed the client during
+  install but then hung Lutris forever (MTGO on the login screen keeps the
+  umu/proton tree alive and `lutris-wrapper` never returns). First Play deploys
+  instead — standard ClickOnce behaviour.
+
+README rewritten for this flow.
+
+**Not done (environment limitation, not a code issue):** commits are local only
+on `claude/mtgo-lutris-aurora-oiwfn8`. This box has no git push credentials (no
+`gh`, no SSH key, no token). Someone needs to push the branch and fast-forward
+`main`. `git log origin/main..claude/mtgo-lutris-aurora-oiwfn8` shows the pending
+commits.
+
 ### [2026-08-29 ~00:45 — Play verified working; final clean acceptance test running]
 
 **Both crashes are fixed and MTGO reaches a stable connected login screen on

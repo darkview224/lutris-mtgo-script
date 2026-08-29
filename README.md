@@ -1,18 +1,25 @@
-# MTGO on Aurora (Fedora Atomic) via Flatpak Lutris
+# MTGO on Fedora Atomic (Bazzite / Aurora / Silverblue / Kinoite)
 
-Installs Magic: The Gathering Online on Aurora — or any Fedora Atomic distro
-(Bazzite, Silverblue, Kinoite) where Lutris is only available as a Flatpak.
-Follow the steps below in order. Every command is meant to be copy-pasted
-as-is into a terminal.
+Installs **Magic: The Gathering Online** on Fedora Atomic distributions through
+Lutris, whether Lutris is installed natively (Bazzite ships it) or as a Flatpak
+(Aurora). It reaches a working, connected login screen with no manual Wine
+tweaking.
 
-## 1. Install Lutris
+## 1. Install Lutris (skip if you already have it)
+
+**Bazzite** ships Lutris — check your app menu first. If it's missing:
 
 ```
 flatpak install --user flathub net.lutris.Lutris
 ```
 
-If that fails because Flathub isn't set up, run this first, then repeat the
-command above:
+**Aurora / Silverblue / Kinoite:**
+
+```
+flatpak install --user flathub net.lutris.Lutris
+```
+
+If that fails because Flathub isn't set up, run this first, then repeat:
 
 ```
 flatpak remote-add --user --if-not-exists flathub https://flathub.org/repo/flathub.flatpakrepo
@@ -24,147 +31,125 @@ flatpak remote-add --user --if-not-exists flathub https://flathub.org/repo/flath
 git clone https://github.com/darkview224/lutris-mtgo-script.git
 ```
 
-You now have `lutris-mtgo-script/magic-the-gathering-online.yml`. It
-downloads MTGO's `setup.exe` for you — no separate manual download needed.
+You now have `lutris-mtgo-script/magic-the-gathering-online.yml`. It downloads
+MTGO's `setup.exe` for you — no separate manual download needed.
 
-## 3. Install a GE-Proton/Wine-GE runner build
+## 3. Run the installer
 
-MTGO needs a newer Wine build than Lutris ships by default. Do this once,
-before installing the game:
-
-1. Open Lutris.
-2. Click the hamburger menu (top right) → **Preferences**.
-3. Go to the **Runners** tab, find **Wine** in the list, and click the
-   settings/gear icon next to it.
-4. Click **Manage Versions**.
-5. In the list that opens, install the newest build whose name starts with
-   `GE-Proton` (or `wine-ge` if no GE-Proton build is listed). This
-   downloads it into Lutris's own Flatpak data directory — nothing is
-   written to your host system.
-6. Close the version manager and Preferences.
-
-## 4. Run the installer
-
-1. In Lutris, click the **+** button (top left) → **Install script**.
-2. Browse to `lutris-mtgo-script/magic-the-gathering-online.yml` from step 2
-   and select it.
-3. **Make sure the install directory it offers doesn't already exist** (or
-   is completely empty). Re-running this installer into a folder that
-   already has an MTGO install in it will fail partway through — Lutris
-   aborts the whole install if any winetricks step finds something already
-   applied, instead of just skipping it. If you're redoing an install,
-   delete the old folder first.
-4. Click through the installer. It will:
-   - download `setup.exe` from MTGO's patch server,
+1. In Lutris, click the **+** button (top left) → **Install script** (Flatpak
+   Lutris calls this "Install game from a local file").
+2. Browse to `lutris-mtgo-script/magic-the-gathering-online.yml` and select it.
+3. Click **Install**, then **Continue** to accept the default install directory
+   (`~/Games/magic-the-gathering-online`). **It must not already exist** — if
+   you're redoing an install, delete the old folder first (re-running the
+   installer over an existing folder aborts partway through; see "Redoing an
+   install" below).
+4. Click **Install** on the file list, then let it run. It will:
    - create a Wine prefix,
-   - install fonts and .NET Framework 4.8 (this step takes a few minutes —
-     let it finish, don't cancel it),
-   - disable the Wine sound driver (see "Why sound is disabled" below),
-   - force GDI rendering so MTGO's main window actually appears (see
-     "Why GDI rendering is forced" below),
-   - run `setup.exe` to install the MTGO client itself.
-5. When it finishes, MTGO is listed in your Lutris library as
-   **Magic The Gathering Online**.
+   - install fonts and .NET Framework 4.8 (**this step takes several minutes
+     with no visible progress — let it finish, don't cancel it**),
+   - disable the Wine sound driver and force GDI rendering (see the notes at the
+     bottom).
+5. When it says **Installation completed!**, click **Close**. MTGO is now in
+   your Lutris library as **Magic The Gathering Online**.
 
-## 5. Set the game to use the GE-Proton/Wine-GE build
+Lutris 0.5.22 automatically runs this through the latest GE-Proton (via umu) —
+you do **not** need to install a runner or set a Wine version by hand.
 
-The installer doesn't pin a Wine version, so point it at the one you
-installed in step 3:
+## 4. Play
 
-1. Right-click **Magic The Gathering Online** in your library → **Configure**.
-2. Go to the **Runner options** tab.
-3. Set **Wine version** to the GE-Proton/Wine-GE build you installed.
-4. Click **Save**.
+Click **Play**.
 
-## 6. Play
+**The first launch** runs MTGO's ClickOnce bootstrapper. It shows an
+**"Application Install - Security Warning"** window — click **Install** (under
+Wine this window sometimes paints blank; the Install button is still there at the
+bottom, or press **Alt+I**). It then downloads the ~640 MB client, deploys it,
+and opens the MTGO login screen. This first launch takes a while; leave it be.
 
-Click **Play** on the game in Lutris. The first launch runs the MTGO
-bootstrapper, which finishes downloading and activating the client, then
-opens MTGO's login screen. Every subsequent click of **Play** launches MTGO
-directly, with the freeze-prevention tweak (step below) re-applied
-automatically first.
+**Every later launch** opens MTGO directly, with the freeze-prevention tweak
+re-applied automatically first.
+
+You don't have to log in for the install to be considered working — reaching a
+stable login screen that stays open is the goal.
 
 ---
 
 ## Why sound is disabled
 
-MTGO reliably crashes under Wine the instant it tries to play a sound
-effect (the EULA-accept chime, a match starting, etc.) — this is a known
-Wine/.NET WPF audio issue, not something specific to this script or to
-Aurora. Disabling Wine's audio driver sidesteps the crash entirely. MTGO is
-fully playable without sound; you aren't losing anything you'd otherwise
-have working.
+MTGO plays a chime as it starts up. Under Wine that code path also queries the
+audio session through `ISimpleAudioVolume`, and Wine's PulseAudio driver returns
+`E_NOINTERFACE` for it — MTGO doesn't handle that and dies with an unhandled
+`InvalidCastException` before the login screen is usable. With **no** audio
+driver at all, the same code hits a failure MTGO *does* handle, and it carries
+on. The installer disables audio two ways: a runner-level DLL override
+(`winepulse.drv` etc. → disabled, which is the one that actually sticks) and the
+`winetricks sound=disabled` verb as a backup. MTGO is fully playable without
+sound.
 
 ## Why GDI rendering is forced
 
-MTGO's UI is built on WPF, which normally renders through Direct3D. Under
-Wine, that can fail silently: MTGO's splash and loading screens appear, the
-process stays running, but the main window never actually shows up. Forcing
-WPF onto Wine's GDI renderer (`winetricks renderer=gdi`) avoids this. This
-is the same fix used by the actively-maintained
-[pauleve/docker-mtgo](https://github.com/pauleve/docker-mtgo) project's own
-Wine setup.
+MTGO's UI is WPF, which normally renders through Direct3D. Under Wine that can
+fail silently: the splash and loading screens appear, the process keeps running,
+but the main window never shows up. Forcing WPF onto Wine's GDI renderer
+(`winetricks renderer=gdi`) avoids this. Same fix the
+[pauleve/docker-mtgo](https://github.com/pauleve/docker-mtgo) project uses.
+
+## Why ntsync is disabled (`PROTON_NO_NTSYNC=1`)
+
+GE-Proton 11 defaults to the kernel's new `ntsync` synchronization primitive.
+With it, MTGO's WPF startup crashes while tearing down one of its own windows —
+an unhandled `Win32Exception` from `HwndWrapper.DestroyWindow` inside
+`Dispatcher.ShutdownImpl()`. Several windows flash up and then `MTGO.exe` dies
+while the rest of the Wine process tree keeps running (Lutris still shows
+"Stop"). Forcing the older `fsync` path fixes it. The installer sets this as a
+game environment variable; same fix used by the
+[phever/mtgo-linux](https://github.com/phever/mtgo-linux) project.
 
 ## Why there's a "tuning" step on every launch
 
-MTGO's WPF-based collection view can peg a CPU core and freeze the UI for
-seconds at a time when scrolling or searching a large card collection. Four
-flags in `MTGO.exe.config` (`DisableAutomationPeer`, `PurgeAutomationEvents`,
-`DisableStylusInput`, `DisableTabletDevices`) fix this. The problem is that
-MTGO's own auto-updater overwrites that config file and resets the flags
-back to `false` on every client update. The installer writes a small script,
-`mtgo-tune.sh`, into the game's own install folder and wires it up as a
-Lutris pre-launch command, so it re-applies those four flags right before
-MTGO starts, every time — no manual steps needed after the initial install,
-and no editing of files outside the game's own prefix.
+MTGO's WPF collection view can peg a CPU core and freeze the UI for seconds at a
+time when scrolling or searching a large collection. Four flags in
+`MTGO.exe.config` (`DisableAutomationPeer`, `PurgeAutomationEvents`,
+`DisableStylusInput`, `DisableTabletDevices`) fix this, but MTGO's auto-updater
+resets that file on every client update. The installer drops a small script,
+`mtgo-tune.sh`, into the game folder and wires it up as a Lutris pre-launch
+command, so the flags are re-applied right before every launch — no manual steps,
+and nothing touched outside the game's own prefix.
 
 ## Troubleshooting
 
-- **Installer hangs on the .NET Framework 4.8 step.** This is normal — it
-  can take several minutes with no visible progress. Only cancel it if it's
-  been stuck for more than ~15 minutes.
-- **Game won't launch / crashes immediately.** Double check step 5 — MTGO
-  needs the GE-Proton/Wine-GE build, not Lutris's older bundled Wine.
-- **Splash/loading screens appear, then nothing — no main window, but the
-  process is still running.** This is MTGO's WPF UI failing to render
-  under Wine's default hardware-accelerated renderer. The installer
-  already applies the fix (`winetricks renderer=gdi`) for new installs. If
-  you installed with an older copy of this script, see "Applying a fix to
-  an existing install" below.
-- **Still crashes when a sound would play.** The installer already applies
-  `winetricks sound=disabled`. If it's still happening, see "Applying a fix
-  to an existing install" below to re-apply that verb.
-- **UI still freezes when scrolling your collection.** Confirm
-  `mtgo-tune.sh` actually ran: check the Lutris install folder for the game
-  (visible under **Configure** → **System options** → **Game directory**)
-  and make sure `mtgo-tune.sh` is present and executable. If MTGO was just
-  updated by its own auto-updater, launch the game once more — the
-  pre-launch hook re-applies the flags before every session.
+- **Installer looks frozen on the .NET Framework 4.8 step.** Normal — it can
+  take 10+ minutes with no visible progress. Only worry if it's been stuck for
+  more than ~20 minutes.
+- **First Play: the "Application Install - Security Warning" window is blank.**
+  Also normal (WPF-under-Wine paint bug). The **Install** button is still there
+  at the bottom-right; click it, or press **Alt+I**.
+- **Windows flash up on launch, then everything closes but Lutris still shows
+  "Stop".** That's the ntsync crash. Confirm the game's configuration still has
+  `PROTON_NO_NTSYNC=1` (**Configure → System options → Environment variables**).
+- **Splash/loading screens appear, then nothing — no main window.** WPF failing
+  to render. The installer applies `winetricks renderer=gdi`; if you're on an
+  older install that predates it, see "Redoing an install" below.
+- **Crashes right after the loading screen, log mentions `ISimpleAudioVolume`
+  or audio.** The audio-disable didn't take. Check **Configure → Runner options
+  → DLL overrides** contains `winepulse.drv=disabled` (plus winealsa / wineoss /
+  winecoreaudio).
+- **UI freezes when scrolling your collection.** Make sure `mtgo-tune.sh` is
+  present and executable in the game folder (**Configure → System options →
+  Game directory**). If MTGO just auto-updated, launch once more — the
+  pre-launch hook re-applies the flags every time.
 
-### Applying a fix to an existing install
+## Redoing an install
 
-**Do not just re-run `magic-the-gathering-online.yml`** against a folder
-you already installed to. Lutris's winetricks step treats a verb that's
-already applied as a hard error and aborts the *rest* of the install
-silently — including any later steps you actually needed — rather than
-skipping it and moving on. This applies even on a second machine if you're
-installing into a shared/external drive that already has a previous
-attempt's files on it — check the target folder is actually empty first.
+**Don't just re-run `magic-the-gathering-online.yml`** into a folder that already
+has an install in it. Lutris treats an already-applied winetricks verb as a hard
+error and silently aborts the rest of the install. Delete the game from your
+Lutris library (with files) and confirm `~/Games/magic-the-gathering-online` is
+actually gone before reinstalling.
 
-If you just need to re-apply one winetricks fix (e.g. you're on an older
-install that predates `renderer=gdi` being added), use `fix-renderer.yml`
-from this repo the same way you installed the main script (Lutris "+" →
-"Install script"), but when it asks for an install location, browse to
-your **existing** MTGO folder instead of accepting a new one. It applies
-exactly one winetricks verb (`renderer=gdi`) to that folder and nothing
-else. Afterward, remove the temporary "MTGO Renderer Fix" entry Lutris
-creates (right-click → Remove, without deleting files) and keep using your
-real game entry. The same pattern works for any other single verb — copy
-`fix-renderer.yml`, change the `app:` line under `installer:` to the verb
-you need (e.g. `sound=disabled`), and install it into your existing folder
-the same way.
-
-If your game's Lutris library entry itself gets removed (its files are
-still on disk, you just lost the entry), use `reconnect.yml` the same
-way — point it at the existing folder — to recreate the entry with no
-winetricks steps at all.
+To re-apply just one winetricks verb to an existing install without a full
+reinstall, use `fix-renderer.yml` (or a copy of it with the `app:` line changed)
+the same way you ran the main script, but point it at your **existing** game
+folder when it asks for a location. Afterward remove the temporary entry Lutris
+creates (right-click → Remove, without deleting files). If you lost only the
+Lutris library entry (files still on disk), use `reconnect.yml` the same way.

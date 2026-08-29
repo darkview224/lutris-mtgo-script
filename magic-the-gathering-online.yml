@@ -54,13 +54,12 @@ script:
     prefix: $GAMEDIR
     arch: win64
 
-  # Pin the runner to the latest GE-Proton. MTGO needs a modern Wine build;
-  # Lutris's bundled Wine is too old and the client crashes on launch with it.
-  # "ge-proton" is a Lutris alias for "newest installed GE-Proton" (it will
-  # fetch one if none is present), so this removes the old manual
-  # "Configure -> Runner options -> Wine version" step.
-  wine:
-    version: ge-proton
+  # No "wine:" version block on purpose. Lutris 0.5.22 already defaults a new
+  # Wine game to the latest GE-Proton (run through umu), which is exactly what
+  # MTGO needs — so the old manual "Configure -> Runner options -> Wine version"
+  # step is no longer required. (Pinning it explicitly here does NOT work:
+  # Lutris's installer rewrites "ge-proton" to "ge-proton-x86_64" and then
+  # fails to resolve that as a downloadable runner.)
 
   system:
     env:

@@ -71,9 +71,23 @@ script:
       # Dispatcher.ShutdownImpl() — a thread-wakeup / synchronization failure
       # that only happens under ntsync. Forcing the fsync fallback
       # (PROTON_NO_NTSYNC=1) makes MTGO reach a stable, connected login screen.
-      # Confirmed against GE-Proton11-4 on Bazzite; same fix used by the
+      # Confirmed against GE-Proton 11-4/11-6 on Bazzite; same fix used by the
       # phever/mtgo-linux project.
       PROTON_NO_NTSYNC: '1'
+      # Critical fix: hard-disable Wine's audio driver via DLL override.
+      # MTGO's AudioManager plays a startup chime; under Wine that path also
+      # queries the audio session (ISimpleAudioVolume). With winepulse loaded,
+      # that QueryInterface returns E_NOINTERFACE and MTGO dies with an
+      # unhandled InvalidCastException before the login window is usable. With
+      # NO audio driver at all, the same code hits a *handled* NAudio
+      # "BadDeviceId" and MTGO carries on to the login screen.
+      # The `sound=disabled` winetricks verb below is supposed to do this, but
+      # its registry write does not reliably survive a GE-Proton 11-6 prefix
+      # (winepulse gets re-registered at launch). This env override can't be
+      # lost that way, so it's the real fix; the winetricks verb stays as a
+      # belt-and-braces second layer. Proton appends its own overrides after
+      # this value, and it sets nothing for these DLLs, so the disable sticks.
+      WINEDLLOVERRIDES: winepulse.drv=;winealsa.drv=;wineoss.drv=;winecoreaudio.drv=
     prelaunch_command: bash $GAMEDIR/mtgo-tune.sh
     prelaunch_wait: true
 
@@ -88,9 +102,11 @@ script:
       prefix: $GAMEDIR
       app: corefonts dotnet48
 
-  # Critical fix: MTGO crashes under Wine the moment it plays a sound.
-  # Disabling the audio driver avoids the crash entirely; the client is
-  # fully usable without sound.
+  # Disable the Wine audio driver. MTGO plays a chime at startup and crashes
+  # under Wine when it does. This is the "belt" layer; the real fix is the
+  # WINEDLLOVERRIDES audio disable in `system: env:` above, because this
+  # registry write does not reliably survive a GE-Proton 11-6 prefix. The
+  # client is fully usable without sound.
   - task:
       name: winetricks
       prefix: $GAMEDIR
@@ -106,11 +122,20 @@ script:
       prefix: $GAMEDIR
       app: renderer=gdi
 
+  # Run the ClickOnce bootstrapper to download + deploy the client. It shows an
+  # "Application Install - Security Warning" dialog first — click Install (it may
+  # render as a blank window; the button is still there, bottom-right / Alt+I).
+  # exclude_processes: once setup.exe has finished the download it hands off to
+  # MTGO.exe (which then sits on the login screen) plus GE-Proton's dfsvc.exe /
+  # xalia.exe / umu.exe helpers. None of those ever exit on their own, so
+  # without listing them here Lutris waits forever on this step and the install
+  # never completes. setup.exe itself is NOT excluded, so Lutris still waits for
+  # the ~640 MB download to finish.
   - task:
       name: wineexec
       prefix: $GAMEDIR
       executable: setup
-      exclude_processes: dfsvc.exe
+      exclude_processes: dfsvc.exe MTGO.exe xalia.exe umu.exe
 
   # wineexec above runs setup.exe wherever you selected it from (e.g.
   # ~/Downloads) — it does NOT copy it into $GAMEDIR. Without this step,

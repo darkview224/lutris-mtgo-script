@@ -18,18 +18,26 @@ which covers native packages for most major distros as well as Flatpak.
 
 ## 2. Get this repo's installer script
 
+You just need the one file, `magic-the-gathering-online.yml`. The script
+downloads MTGO's `setup.exe` for you — no separate manual download needed.
+
+**Easiest way:** right-click this link and choose "Save Link As" (or
+similar) to download it directly:
+[magic-the-gathering-online.yml](https://raw.githubusercontent.com/darkview224/lutris-mtgo-script/main/magic-the-gathering-online.yml)
+
+**Or, if you're comfortable with git:**
+
 ```
 git clone https://github.com/darkview224/lutris-mtgo-script.git
 ```
 
-You now have `lutris-mtgo-script/magic-the-gathering-online.yml`. It
-downloads MTGO's `setup.exe` for you — no separate manual download needed.
+which gives you `lutris-mtgo-script/magic-the-gathering-online.yml`.
 
 ## 3. Run the installer
 
 1. In Lutris, click the **+** button (top left) → **Install script** (Flatpak
    Lutris calls this "Install game from a local file").
-2. Browse to `lutris-mtgo-script/magic-the-gathering-online.yml` and select
+2. Browse to wherever you saved `magic-the-gathering-online.yml` and select
    it.
 3. Click **Install**, then **Continue** to accept the default install
    directory (`~/Games/magic-the-gathering-online`). **It must not already

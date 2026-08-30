@@ -1,30 +1,20 @@
-# MTGO on Fedora Atomic (Bazzite / Aurora / Silverblue / Kinoite)
+# MTGO for Linux (by Lutris script)
 
-Installs **Magic: The Gathering Online** on Fedora Atomic distributions
-through Lutris — no manual Wine setup needed.
+Installs Magic: The Gathering Online on computers running Linux OS — no
+manual Wine setup needed.
 
 **Status:** built with [Claude Code](https://claude.com/claude-code).
 Confirmed working — clean install through a full played match — on
-**Bazzite with Lutris installed natively**. **Not yet confirmed working on
-Flatpak Lutris** (Aurora, Silverblue, Kinoite) — install completes, but a
-few issues are still open there. See [docs/DESIGN-NOTES.md](docs/DESIGN-NOTES.md)
-for details, troubleshooting, and known issues.
+**Bazzite with Lutris installed natively**. **Not yet confirmed working with
+Lutris installed as a Flatpak** — install completes, but a few issues are
+still open there. See [docs/DESIGN-NOTES.md](docs/DESIGN-NOTES.md) for
+details, troubleshooting, and known issues.
 
 ## 1. Install Lutris (skip if you already have it)
 
-**Bazzite** ships Lutris — check your app menu first.
-
-**Everyone else** (or if Bazzite's missing it):
-
-```
-flatpak install --user flathub net.lutris.Lutris
-```
-
-If that fails because Flathub isn't set up, run this first, then repeat:
-
-```
-flatpak remote-add --user --if-not-exists flathub https://flathub.org/repo/flathub.flatpakrepo
-```
+Some distros (e.g. Bazzite) ship Lutris already — check your app menu first.
+Otherwise, install it from **[lutris.net/downloads](https://lutris.net/downloads)**,
+which covers native packages for most major distros as well as Flatpak.
 
 ## 2. Get this repo's installer script
 

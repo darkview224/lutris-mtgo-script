@@ -74,15 +74,20 @@ than guesswork.
   install, reaches a stable login screen, and a full match has been played
   successfully.
 - **Flatpak Lutris** (Aurora, Silverblue, Kinoite): install completes, but
-  not yet confirmed working. Known issues so far, not yet root-caused:
-  - The client has hung during testing (cause not yet identified — may or
-    may not be Flatpak-specific).
-  - Alt-tabbing away from the MTGO window and back can leave it in a bad
-    state.
-  - On the verification-code screen, the "remember this device for 30 days"
-    checkbox doesn't seem to register clicks.
+  not yet confirmed working end-to-end. Testing is still in progress:
+  - The client hung during one test session; not yet reproduced on a
+    follow-up attempt, and may have simply been resolved by a restart. Not
+    confirmed as a real, repeatable issue.
+  - Alt-tabbing away from the MTGO window and back seemed to leave it in a
+    bad state during testing; also not yet confirmed as reproducible.
+  - **Confirmed, filed:** on the verification-code (2FA) screen, the
+    "remember this device for 30 days" checkbox doesn't respond to clicks —
+    see [issue #1](https://github.com/darkview224/lutris-mtgo-script/issues/1).
+    Not yet known whether this is Flatpak-specific or also affects native
+    Lutris.
 
-  If you hit or diagnose any of these, contributions/reports are welcome.
+  If you hit or can confirm/deny any of these, reports and issues are
+  welcome.
 
 ## Troubleshooting
 

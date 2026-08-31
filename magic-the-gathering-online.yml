@@ -35,8 +35,8 @@
 
 name: Magic The Gathering Online
 game_slug: magic-the-gathering-online
-version: GE-Proton
-slug: magic-the-gathering-online-ge-proton
+version: '2026-08'
+slug: magic-the-gathering-online-2026-08
 runner: wine
 
 script:

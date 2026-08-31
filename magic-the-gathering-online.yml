@@ -1,6 +1,4 @@
-# Magic: The Gathering Online — Lutris install script for Fedora Atomic
-# (Bazzite, Aurora, Silverblue/Kinoite). Works with Lutris installed either
-# natively (Bazzite) or as a Flatpak (Aurora).
+# Magic: The Gathering Online — Lutris install script.
 #
 # This script only uses features Lutris manages itself (its own Wine/GE-Proton
 # runner builds, its own winetricks, its own per-game pre-launch hook). It never
@@ -37,8 +35,8 @@
 
 name: Magic The Gathering Online
 game_slug: magic-the-gathering-online
-version: Fedora Atomic
-slug: magic-the-gathering-online-atomic
+version: GE-Proton
+slug: mtgo-ge-proton
 runner: wine
 
 script:

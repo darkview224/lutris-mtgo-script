@@ -3,12 +3,12 @@
 Installs Magic: The Gathering Online on computers running Linux OS — no
 manual Wine setup needed.
 
-**Status:** built with [Claude Code](https://claude.com/claude-code).
-Confirmed working — clean install through a full played match — on
-**Bazzite with Lutris installed natively**. **Not yet confirmed working with
-Lutris installed as a Flatpak** — install completes, but a few issues are
-still open there. See [docs/DESIGN-NOTES.md](docs/DESIGN-NOTES.md) for
-details, troubleshooting, and known issues.
+**Status:** Confirmed working — clean install through a full played match —
+on Bazzite (with Lutris installed natively) by developer, and on Lutris
+installed as a Flatpak by other users. Sound is currently not functional.
+See [docs/DESIGN-NOTES.md](docs/DESIGN-NOTES.md) for details,
+troubleshooting, and known issues. Built with
+[Claude Code](https://claude.com/claude-code).
 
 ## 1. Install Lutris (skip if you already have it)
 

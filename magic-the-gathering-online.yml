@@ -40,6 +40,8 @@ slug: magic-the-gathering-online-2026-08
 runner: wine
 
 script:
+  # Source / issues: https://github.com/darkview224/lutris-mtgo-script
+
   # Downloads setup.exe directly from MTGO's own patch server (operated by
   # Daybreak Games) instead of making you fetch it by hand first. If this URL
   # ever starts failing (patch-server paths do occasionally change), replace
@@ -94,6 +96,22 @@ script:
     prelaunch_wait: true
 
   installer:
+  # Refuses to run into a leftover/partial install instead of failing deep in
+  # winetricks with a bare "exit 256" (Lutris treats an already-applied
+  # winetricks verb as a hard error, not something to skip). $GAMEDIR itself
+  # always exists at this point — Lutris creates the empty folder as soon as
+  # you confirm the install location — so this only fires when it actually
+  # has leftover content in it.
+  - execute:
+      command: |
+        if [ -n "$(ls -A "$GAMEDIR" 2>/dev/null)" ]; then
+          echo "ERROR: $GAMEDIR is not empty."
+          echo "This installer only supports installing into a new, empty folder."
+          echo "Remove the existing game (with files) from your Lutris library, or delete the folder by hand, then reinstall."
+          echo "See docs/DESIGN-NOTES.md, section 'Redoing an install', to patch an existing install instead of a full reinstall."
+          exit 1
+        fi
+
   - task:
       name: create_prefix
       prefix: $GAMEDIR

@@ -73,18 +73,24 @@ than guesswork.
 - **Bazzite, native Lutris install**: confirmed working end-to-end — clean
   install, reaches a stable login screen, and a full match has been played
   successfully.
-- **Flatpak Lutris** (Aurora, Silverblue, Kinoite): install completes, but
-  not yet confirmed working end-to-end. Testing is still in progress:
-  - The client hung during one test session; not yet reproduced on a
-    follow-up attempt, and may have simply been resolved by a restart. Not
-    confirmed as a real, repeatable issue.
+- **Flatpak Lutris** (Aurora, Silverblue, Kinoite): confirmed working
+  end-to-end, including a full played match, by other users. A user has
+  also reported it working under
+  [Games on Whales](https://github.com/games-on-whales) (which runs Lutris
+  itself inside Docker) — an unverified but promising extra data point.
+  - The client hung during one early test session; not reproduced since,
+    and may have simply been resolved by a restart. Not confirmed as a
+    real, repeatable issue.
   - Alt-tabbing away from the MTGO window and back seemed to leave it in a
-    bad state during testing; also not yet confirmed as reproducible.
-  - **Confirmed, filed:** on the verification-code (2FA) screen, the
-    "remember this device for 30 days" checkbox doesn't respond to clicks —
-    see [issue #1](https://github.com/darkview224/lutris-mtgo-script/issues/1).
-    Not yet known whether this is Flatpak-specific or also affects native
-    Lutris.
+    bad state during early testing; also not yet confirmed as reproducible.
+  - **Cosmetic, not a real bug:** on the verification-code (2FA) screen,
+    the "remember this device for 30 days" checkbox doesn't render as
+    checked when clicked, but it does actually take effect — likely a
+    Wine font-rendering quirk. See
+    [issue #1](https://github.com/darkview224/lutris-mtgo-script/issues/1).
+  - **Known issue, not yet fixed:** no sound (see "Why sound is disabled"
+    above — this is the installer working as designed, not a regression).
+    Not currently a priority, but open to a future fix.
 
   If you hit or can confirm/deny any of these, reports and issues are
   welcome.

@@ -49,7 +49,8 @@ which gives you `lutris-mtgo-script/magic-the-gathering-online.yml`.
    your Lutris library as **Magic The Gathering Online**.
 
 You do not need to install a Wine/Proton runner or set a Wine version
-yourself — Lutris handles that automatically.
+yourself — Lutris handles that automatically (see **Troubleshooting** below
+if that step fails).
 
 ## 4. Play
 
@@ -62,6 +63,34 @@ sets up the ~640 MB client and opens the MTGO login screen. This first
 launch takes a while — leave it be.
 
 **Every later launch** opens MTGO directly.
+
+## Troubleshooting
+
+**Installer fails immediately with "ERROR: ... is not empty."** This means
+the folder Lutris wants to install into already has something in it, either
+from a previous install of this script or from files left behind after a
+failed attempt. The installer refuses to run into a folder that isn't empty,
+because Lutris treats a step that's already been applied (like a winetricks
+verb) as a hard failure rather than something to skip, so a second run into
+the same folder wouldn't get you a clean result anyway. If you're redoing an
+install, remove the existing game from your Lutris library first (right-click
+it, choose **Remove**, and tick the box to also delete files), and confirm
+the folder — `~/Games/magic-the-gathering-online` by default — is actually
+gone before running the installer again. If there's no library entry to
+remove, just delete the folder's contents by hand.
+
+**Installer fails on the Wine/GE-Proton setup step, right at the start.**
+This script defaults to GE-Proton, which works well on most systems, but
+some Linux distributions or versions of Lutris have trouble resolving it, and
+the install fails before anything else runs. If that happens, open
+`magic-the-gathering-online.yml` in a plain text editor and find the `wine:`
+section near the top of the `script:` block. It has two `version:` lines: one
+reading `version: ge-proton`, and below it, commented out, one reading
+`version: wine-staging-x86_64`. Add a `#` to the front of the `ge-proton`
+line to disable it, then remove the `#` from the front of the
+`wine-staging-x86_64` line to enable it instead. Save the file and run the
+installer again — this switches the runner to wine-staging, an alternative
+that's compatible with a wider range of systems.
 
 ---
 

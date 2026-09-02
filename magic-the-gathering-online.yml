@@ -35,8 +35,8 @@
 
 name: Magic The Gathering Online
 game_slug: magic-the-gathering-online
-version: '2026-08'
-slug: magic-the-gathering-online-2026-08
+version: '2026-09'
+slug: magic-the-gathering-online-2026-09
 runner: wine
 
 script:
@@ -56,13 +56,15 @@ script:
     prefix: $GAMEDIR
     arch: win64
 
-  # No "wine: version:" block on purpose. Lutris 0.5.22 already defaults a new
-  # Wine game to the latest GE-Proton (run through umu), which is what MTGO
-  # needs — so the old manual "Configure -> Runner options -> Wine version" step
-  # is no longer required. (Pinning it explicitly here does NOT work: Lutris's
-  # installer rewrites "ge-proton" to "ge-proton-x86_64" and then fails to
-  # resolve that as a downloadable runner.)
   wine:
+    # GE-Proton works well on most systems. Some distros or versions of Lutris
+    # have trouble with GE-Proton. If so, comment out (add # before) the line
+    # reading `version: ge-proton`; and uncomment (delete the # before) the
+    # line reading `version: wine-staging-x86_64`. This switches the runner to
+    # wine-staging, which is more compatible with some systems.
+    version: ge-proton
+#    version: wine-staging-x86_64
+
     # Critical fix: hard-disable Wine's audio drivers. MTGO's AudioManager plays
     # a chime at startup; under Wine that path also queries the audio session
     # (ISimpleAudioVolume). With winepulse loaded, that QueryInterface returns

@@ -98,6 +98,18 @@ script:
     prelaunch_wait: true
 
   installer:
+  # Shown before anything else runs, so it's visible even if the install
+  # fails on the very first step (e.g. the GE-Proton/wine-staging runner
+  # mismatch documented in the README). A modal pop-up, not just log text,
+  # so it isn't missed in the scrolling install output.
+  - input_menu:
+      description: |
+        If this installation fails, see this project's README (Troubleshooting section) for fixes, and its issue tracker to report a problem:
+        https://github.com/darkview224/lutris-mtgo-script
+      id: readme_ack
+      options:
+      - ack: Continue
+
   # Refuses to run into a leftover/partial install instead of failing deep in
   # winetricks with a bare "exit 256" (Lutris treats an already-applied
   # winetricks verb as a hard error, not something to skip). $GAMEDIR itself

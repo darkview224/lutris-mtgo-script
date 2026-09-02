@@ -66,31 +66,9 @@ launch takes a while — leave it be.
 
 ## Troubleshooting
 
-**Installer fails immediately with "ERROR: ... is not empty."** This means
-the folder Lutris wants to install into already has something in it, either
-from a previous install of this script or from files left behind after a
-failed attempt. The installer refuses to run into a folder that isn't empty,
-because Lutris treats a step that's already been applied (like a winetricks
-verb) as a hard failure rather than something to skip, so a second run into
-the same folder wouldn't get you a clean result anyway. If you're redoing an
-install, remove the existing game from your Lutris library first (right-click
-it, choose **Remove**, and tick the box to also delete files), and confirm
-the folder — `~/Games/magic-the-gathering-online` by default — is actually
-gone before running the installer again. If there's no library entry to
-remove, just delete the folder's contents by hand.
+**Non-empty install path.** If your install path is not empty, it will often cause the installation to fail with error code 256. This can occur if a prior installation to the path failed, or a previous installation was removed. The installer should immediately detect this and fail early with an explanatory message, but certain unusual configurations have been known to bypass it. In either case, the solution is to either change your install path, or remove the directory that is already there. Using Lutris's `Remove` feature is often not sufficient, even if you check `delete files` and `remove from library`. Use of a file explorer or the `rm -r` command is recommented.
 
-**Installer fails on the Wine/GE-Proton setup step, right at the start.**
-This script defaults to GE-Proton, which works well on most systems, but
-some Linux distributions or versions of Lutris have trouble resolving it, and
-the install fails before anything else runs. If that happens, open
-`magic-the-gathering-online.yml` in a plain text editor and find the `wine:`
-section near the top of the `script:` block. It has two `version:` lines: one
-reading `version: ge-proton`, and below it, commented out, one reading
-`version: wine-staging-x86_64`. Add a `#` to the front of the `ge-proton`
-line to disable it, then remove the `#` from the front of the
-`wine-staging-x86_64` line to enable it instead. Save the file and run the
-installer again — this switches the runner to wine-staging, an alternative
-that's compatible with a wider range of systems.
+**Runner mismatch.** This script defaults to GE-Proton, which works well on most systems. Some specific implementations of Lutris or specific Linux distros do not handle GE-Proton well (e.g.: Manjaro with Lutris stable 0.5.22 (system) or Lutris master code (GIT)). In this case, you can try changing the runner. This requires altering two characters in the script: add a `#` to the start of the line reading `    version: ge-proton`, and delete the `#` at the start of the line reading `#    version: wine-staging-x86_64`. Make these changes, save the file, clear out your failed installation if any (see previous), and try again with the altered script.
 
 ---
 

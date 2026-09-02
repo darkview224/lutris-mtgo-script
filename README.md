@@ -49,7 +49,8 @@ which gives you `lutris-mtgo-script/magic-the-gathering-online.yml`.
    your Lutris library as **Magic The Gathering Online**.
 
 You do not need to install a Wine/Proton runner or set a Wine version
-yourself — Lutris handles that automatically.
+yourself — Lutris handles that automatically (see **Troubleshooting** below
+if that step fails).
 
 ## 4. Play
 
@@ -62,6 +63,12 @@ sets up the ~640 MB client and opens the MTGO login screen. This first
 launch takes a while — leave it be.
 
 **Every later launch** opens MTGO directly.
+
+## Troubleshooting
+
+**Non-empty install path.** If your install path is not empty, it will often cause the installation to fail with error code 256. This can occur if a prior installation to the path failed, or a previous installation was removed. The installer should immediately detect this and fail early with an explanatory message, but certain unusual configurations have been known to bypass it. In either case, the solution is to either change your install path, or remove the directory that is already there. Using Lutris's `Remove` feature is often not sufficient, even if you check `delete files` and `remove from library`. Use of a file explorer or the `rm -r` command is recommended.
+
+**Runner mismatch.** This script uses your default Wine runner, which is typically GE-Proton. GE-Proton works well on most systems, and has held up for most tests. Some specific implementations of Lutris or specific Linux distros do not handle GE-Proton well (e.g.: Manjaro with Lutris stable 0.5.22 (system) or Lutris master code (GIT)). In this case, you can try changing the runner by editting the script using any text editor. Simply deleting the `#` at the start of the line reading `#    version: wine-staging-x86_64` will switch to the runner that has had the most success after GE-Proton. Make this change, save the file, clear out your failed installation if any (see previous), and try again with the altered script.
 
 ---
 

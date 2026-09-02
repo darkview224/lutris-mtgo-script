@@ -57,12 +57,7 @@ script:
     arch: win64
 
   wine:
-    # GE-Proton works well on most systems. Some distros or versions of Lutris
-    # have trouble with GE-Proton. If so, comment out (add # before) the line
-    # reading `version: ge-proton`; and uncomment (delete the # before) the
-    # line reading `version: wine-staging-x86_64`. This switches the runner to
-    # wine-staging, which is more compatible with some systems.
-    version: ge-proton
+    # Most Lutris installations use GE-Proton as their default Wine runner, and it works well on most systems. Some distros or versions of Lutris have trouble with GE-Proton. If so, delete the # starting the following line reading `version: wine-staging-x86_64`. This switches the runner to wine-staging, which is more compatible with some systems.
 #    version: wine-staging-x86_64
 
     # Critical fix: hard-disable Wine's audio drivers. MTGO's AudioManager plays
